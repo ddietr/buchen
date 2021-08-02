@@ -56,17 +56,6 @@ func getCurrentEntry(entries []DateEntry) *DateEntry {
   return nil
 }
 
-func createEntry() DateEntry {
-  now := time.Now()
-  return DateEntry{
-    Date: now.Format("02 Jan"),
-    Time: "0,0",
-    StartedAt: &now,
-    Project: "...",
-    Description: "- ...",
-  }
-}
-
 func writeToFile(filename string, entries []DateEntry) {
   text := ""
   for _, entry := range entries {

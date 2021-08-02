@@ -33,6 +33,7 @@ func main() {
       CmdTimerStart(),
       CmdTimerStop(),
       CmdTimerNew(),
+      CmdInit(),
     },
     Action:  func(c *cli.Context) error {
       PrintView()
@@ -70,12 +71,17 @@ func findConfigFile() (string, error) {
   }
 
   filename := "buchen.yaml"
-  _, err = os.Stat(usr.HomeDir + "/" + filename)
-  if err == nil {
-    return usr.HomeDir + "/" + filename, nil
+  path := usr.HomeDir + "/" + filename
+  _, err = os.Stat(path)
+
+  if err != nil {
+    return "", fmt.Errorf(
+      "Could not find configuration in %s. Run 'buchen init' to create the configuration",
+      path,
+    )
   }
 
-  return filename, nil
+  return path, nil
 }
 
 func serializeDateEntry(entry DateEntry) string {
@@ -119,3 +125,15 @@ func getCurrentTime(entry DateEntry) string {
   log.Fatal("Cannot calc current time")
   return ""
 }
+
+func createEntry() DateEntry {
+  now := time.Now()
+  return DateEntry{
+    Date: now.Format("02 Jan"),
+    Time: "0,0",
+    StartedAt: &now,
+    Project: "...",
+    Description: "- ...",
+  }
+}
+

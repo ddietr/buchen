@@ -13,7 +13,7 @@ sudo cp buchen /usr/local/bin/buchen
 buchen help
 ```
 
-```shell
+```
 NAME:
    buchen - time tracking from cli
 
@@ -26,10 +26,18 @@ COMMANDS:
    start    Start the timer
    stop     Stop the timer
    new      Create new date entry
+   init     Init
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --help, -h  show help (default: false)
+```
+
+## Init
+
+```shell
+# creates a ~/buchen.yaml file
+buchen init
 ```
 
 ## Start/Stop Timer
@@ -48,7 +56,7 @@ buchen
 buchen view
 ```
 
-```shell
+```
 ---
 date: 29 Jul
 time: 0,12
