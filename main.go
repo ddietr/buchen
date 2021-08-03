@@ -36,7 +36,7 @@ func main() {
       CmdInit(),
     },
     Action:  func(c *cli.Context) error {
-      PrintView()
+      printTableView(true)
       return nil
     },
   }
@@ -109,21 +109,31 @@ func serializeDateEntry(entry DateEntry) string {
 }
 
 func getCurrentTime(entry DateEntry) string {
-  if entry.StartedAt == nil || entry.StoppedAt != nil {
-    return entry.Time
+  timeF, err := getCurrentTimeFloat64(entry)
+
+  if err != nil {
+    log.Fatal("Cannot calc current time")
   }
 
-  now := time.Now()
-  diff := now.Sub(*entry.StartedAt)
-  entry.StoppedAt = &now
+  return strings.Replace(fmt.Sprintf("%.2f", timeF), ".", ",", 1)
+}
+
+func getCurrentTimeFloat64(entry DateEntry) (float64, error) {
   timeStr := strings.Replace(entry.Time, ",", ".", 1)
-  if s, err := strconv.ParseFloat(timeStr, 64); err == nil {
-    t := s+(diff.Minutes()/60)
-    return strings.Replace(fmt.Sprintf("%.2f", t), ".", ",", 1)
+  s, err := strconv.ParseFloat(timeStr, 64)
+
+  if err != nil {
+    return 0.0, err
   }
 
-  log.Fatal("Cannot calc current time")
-  return ""
+  if entry.StartedAt != nil && entry.StoppedAt == nil {
+    now := time.Now()
+    diff := now.Sub(*entry.StartedAt)
+    t := s+(diff.Minutes()/60)
+    return t, nil
+  }
+
+  return s, nil
 }
 
 func createEntry() DateEntry {
