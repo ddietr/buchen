@@ -76,3 +76,14 @@ buchen e
 # or
 buchen edit
 ```
+
+## Export CSV
+
+Print date entries in CSV format
+
+```shell
+# All entries
+buchen csv > all.csv
+# Filtered by project
+buchen csv -p sso > sso.csv
+```

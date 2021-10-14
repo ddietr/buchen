@@ -98,10 +98,10 @@ func printTableView(sum bool) {
 		}
 
 		table.Rich(row, []tablewriter.Colors{
-			tablewriter.Colors{},
-			tablewriter.Colors{tablewriter.Bold},
-			tablewriter.Colors{},
-			tablewriter.Colors{},
+			{},
+			{tablewriter.Bold},
+			{},
+			{},
 		})
 	}
 

@@ -36,6 +36,7 @@ func main() {
 			CmdTimerStop(),
 			CmdTimerNew(),
 			CmdInit(),
+			CmdCsv(),
 		},
 		Action: func(c *cli.Context) error {
 			printTableView(true)
@@ -141,7 +142,7 @@ func getCurrentTimeFloat64(entry DateEntry) (float64, error) {
 func createEntry() DateEntry {
 	now := Now()
 	return DateEntry{
-		Date:        now.Format("02 Jan"),
+		Date:        now.Format("02.01.2006"),
 		Time:        "0,0",
 		StartedAt:   &now,
 		Project:     "...",
