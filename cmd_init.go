@@ -8,7 +8,7 @@ import (
 	"os/user"
 )
 
-func CmdInit() *cli.Command {
+func cmdInit() *cli.Command {
 	return &cli.Command{
 		Name:  "init",
 		Usage: "Init",

@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func CmdView() *cli.Command {
+func cmdView() *cli.Command {
 	return &cli.Command{
 		Name:  "view",
 		Usage: "Print entries",

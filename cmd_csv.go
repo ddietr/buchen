@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func CmdCsv() *cli.Command {
+func cmdCsv() *cli.Command {
 	return &cli.Command{
 		Name:  "csv",
 		Usage: "Print entries as csv",
@@ -47,7 +47,7 @@ func printCsv(project string) {
 
 		fmt.Print(entry.Date)
 		fmt.Print(";")
-		fmt.Print(strings.ReplaceAll(entry.Description, "\n", ""))
+		fmt.Print(strings.Trim(strings.ReplaceAll(entry.Description, "\n", " "), " "))
 		fmt.Print(";")
 		fmt.Print(getCurrentTime(entry))
 		fmt.Println("")

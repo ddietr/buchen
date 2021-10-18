@@ -60,9 +60,9 @@ buchen view
 +--------+------+---------+----------------------------+
 |  DATE  | TIME | PROJECT |        DESCRIPTION         |
 +--------+------+---------+----------------------------+
-| 13 Oct | 8,77 | ...     | - TICKET-387               |
+| 13 Oct | 8,77 | ...     | TICKET-387                 |
 |        |      |         |                            |
-| 14 Oct | 1,06 | ...     | - ...                      |
+| 14 Oct | 1,06 | ...     | ...                        |
 |        |      |         |                            |
 +--------+------+---------+----------------------------+
 ```
@@ -86,4 +86,8 @@ Print date entries in CSV format
 buchen csv > all.csv
 # Filtered by project
 buchen csv -p sso > sso.csv
+
+# Output
+Datum;Beschreibung;Aufwand
+18.10.2021;TICKET-358 TICKET-387;8,10
 ```

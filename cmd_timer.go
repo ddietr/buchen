@@ -6,10 +6,9 @@ import (
 	"github.com/urfave/cli/v2"
 	"log"
 	"os"
-	"time"
 )
 
-func CmdTimerStart() *cli.Command {
+func cmdTimerStart() *cli.Command {
 	return &cli.Command{
 		Name:  "start",
 		Usage: "Start the timer",
@@ -20,7 +19,7 @@ func CmdTimerStart() *cli.Command {
 	}
 }
 
-func CmdTimerStop() *cli.Command {
+func cmdTimerStop() *cli.Command {
 	return &cli.Command{
 		Name:  "stop",
 		Usage: "Stop the timer",
@@ -31,7 +30,7 @@ func CmdTimerStop() *cli.Command {
 	}
 }
 
-func CmdTimerNew() *cli.Command {
+func cmdTimerNew() *cli.Command {
 	return &cli.Command{
 		Name:  "new",
 		Usage: "Create new date entry",
@@ -58,8 +57,12 @@ func getCurrentEntry(entries []DateEntry) *DateEntry {
 
 func writeToFile(filename string, entries []DateEntry) {
 	text := ""
-	for _, entry := range entries {
-		text += fmt.Sprintf("%s\n", serializeDateEntry(entry))
+	for i, entry := range entries {
+		if i == len(entries)-1 {
+			text += serializeDateEntry(entry)
+		} else {
+			text += fmt.Sprintf("%s\n", serializeDateEntry(entry))
+		}
 	}
 
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
@@ -98,6 +101,7 @@ func startNewTimer() {
 	entries[len(entries)-1] = *entry
 	entries = append(entries, createEntry())
 	writeToFile(filename, entries)
+	fmt.Println("Created new entry and started timer")
 }
 
 func startTimer() {
@@ -111,7 +115,7 @@ func startTimer() {
 		log.Fatal(err)
 	}
 
-	timeNow := time.Now()
+	timeNow := Now()
 	entry := getCurrentEntry(entries)
 
 	// No current entry found
@@ -123,7 +127,8 @@ func startTimer() {
 
 	// Current entry not stopped
 	if entry.StoppedAt == nil {
-		log.Fatal("Timer already started")
+		fmt.Println("Timer already started")
+		os.Exit(1)
 	}
 
 	if timeNow.After(now.With(*entry.StartedAt).EndOfDay()) {
@@ -139,6 +144,7 @@ func startTimer() {
 	}
 
 	writeToFile(filename, entries)
+	fmt.Println("Timer started")
 }
 
 func stopTimer() {
@@ -158,7 +164,8 @@ func stopTimer() {
 	}
 
 	if entry.StoppedAt != nil {
-		log.Fatal("Timer already stopped")
+		fmt.Println("Timer already stopped")
+		os.Exit(1)
 	}
 
 	stopCurrentEntry(entries, entry)
@@ -168,7 +175,7 @@ func stopTimer() {
 }
 
 func stopCurrentEntry(entries []DateEntry, current *DateEntry) {
-	timeNow := time.Now()
+	timeNow := Now()
 	current.Time = getCurrentTime(*current)
 	current.StoppedAt = &timeNow
 	entries[len(entries)-1] = *current

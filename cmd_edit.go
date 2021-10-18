@@ -8,7 +8,7 @@ import (
 	"os/exec"
 )
 
-func CmdEdit() *cli.Command {
+func cmdEdit() *cli.Command {
 	return &cli.Command{
 		Name:    "edit",
 		Aliases: []string{"e"},

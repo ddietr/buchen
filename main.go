@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+// DateEntry ...
 type DateEntry struct {
 	Date        string
 	Time        string
@@ -23,6 +24,7 @@ type DateEntry struct {
 	Description string
 }
 
+// Now ...
 var Now = time.Now
 
 func main() {
@@ -30,13 +32,13 @@ func main() {
 		Name:  "buchen",
 		Usage: "time tracking from cli",
 		Commands: []*cli.Command{
-			CmdView(),
-			CmdEdit(),
-			CmdTimerStart(),
-			CmdTimerStop(),
-			CmdTimerNew(),
-			CmdInit(),
-			CmdCsv(),
+			cmdView(),
+			cmdEdit(),
+			cmdTimerStart(),
+			cmdTimerStop(),
+			cmdTimerNew(),
+			cmdInit(),
+			cmdCsv(),
 		},
 		Action: func(c *cli.Context) error {
 			printTableView(true)
@@ -146,6 +148,6 @@ func createEntry() DateEntry {
 		Time:        "0,0",
 		StartedAt:   &now,
 		Project:     "...",
-		Description: "- ...",
+		Description: "...",
 	}
 }
