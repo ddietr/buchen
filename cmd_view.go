@@ -16,23 +16,13 @@ func cmdView() *cli.Command {
 		Usage: "Print entries",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:  "table",
-				Value: false,
-				Usage: "table view",
-			},
-			&cli.BoolFlag{
 				Name:  "sum",
 				Value: false,
 				Usage: "sum time of day",
 			},
 		},
 		Action: func(c *cli.Context) error {
-			if c.Bool("table") {
-				printTableView(c.Bool("sum"))
-			} else {
-				printView()
-			}
-
+			printTableView(c.Bool("sum"))
 			return nil
 		},
 	}
@@ -107,21 +97,4 @@ func printTableView(sum bool) {
 
 	table.SetHeader(headers)
 	table.Render()
-}
-
-func printView() {
-	filename, err := findConfigFile()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	entries, err := readConfig(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, entry := range entries {
-		entry.Time = getCurrentTime(entry)
-		fmt.Println(serializeDateEntry(entry))
-	}
 }
