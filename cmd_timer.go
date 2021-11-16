@@ -144,7 +144,7 @@ func startTimer() {
 	}
 
 	writeToFile(filename, entries)
-	fmt.Println("Timer started")
+	fmt.Println("Timer started. Current time:", entry.Time)
 }
 
 func stopTimer() {
@@ -169,7 +169,7 @@ func stopTimer() {
 	}
 
 	stopCurrentEntry(entries, entry)
-	fmt.Println("Time:", entry.Time)
+	fmt.Println("Timer stopped. Current time:", entry.Time)
 
 	writeToFile(filename, entries)
 }
