@@ -120,8 +120,10 @@ func startTimer() {
 
 	// No current entry found
 	if entry == nil {
-		entries = append(entries, createEntry())
+		newEntry := createEntry()
+		entries = append(entries, newEntry)
 		writeToFile(filename, entries)
+		fmt.Println("Timer started. Current time:", newEntry.Time)
 		return
 	}
 
@@ -136,7 +138,9 @@ func startTimer() {
 		entry.StartedAt = nil
 		entry.StoppedAt = nil
 		entries[len(entries)-1] = *entry
-		entries = append(entries, createEntry())
+		newEntry := createEntry()
+		entries = append(entries, newEntry)
+		entry = &newEntry
 	} else {
 		entry.StoppedAt = nil
 		entry.StartedAt = &timeNow
