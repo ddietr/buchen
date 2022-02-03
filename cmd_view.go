@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"regexp"
 )
 
 func cmdView() *cli.Command {
@@ -68,7 +69,15 @@ func printTableView(sum bool) {
 			s := strings.Replace(fmt.Sprintf("%.2f", f), ".", ",", 1)
 
 			existing.Time = s
-			existing.Description += entry.Description
+			existing.Description += ", " + entry.Description
+			matched, _ := regexp.MatchString(
+				"(?:^|[, ])" + existing.Project + "(,|$)",
+				entry.Project,
+			)
+			if !matched {
+				existing.Project += ", " + entry.Project
+			}
+
 			data[entry.Date] = existing
 			continue
 		}
