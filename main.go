@@ -64,6 +64,7 @@ func readConfig(filename string) ([]DateEntry, error) {
 	var doc DateEntry
 	for dec.Decode(&doc) == nil {
 		xs = append(xs, doc)
+		doc = DateEntry{}
 	}
 
 	return xs, nil

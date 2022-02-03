@@ -28,8 +28,8 @@ func TestStopCurrentEntry(t *testing.T) {
 		current,
 	}
 
-	stopCurrentEntry(entries, &current)
-	stopCurrentEntry(entries, &current)
+	stopCurrentEntry(entries, 2, &current)
+	stopCurrentEntry(entries, 2, &current)
 
 	if entries[2].Date != "2021.10.19" {
 		t.Fail()

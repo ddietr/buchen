@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/jinzhu/now"
-	"github.com/urfave/cli/v2"
 	"log"
 	"os"
+	"strings"
+	"github.com/jinzhu/now"
+	"github.com/urfave/cli/v2"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/terminal"
 )
 
 func cmdTimerStart() *cli.Command {
@@ -41,18 +44,25 @@ func cmdTimerNew() *cli.Command {
 	}
 }
 
-func getCurrentEntry(entries []DateEntry) *DateEntry {
+func getCurrentEntry(entries []DateEntry) (int, *DateEntry) {
 	if len(entries) == 0 {
-		return nil
+		return -1, nil
 	}
 
-	last := entries[len(entries)-1]
+	for i, entry := range entries {
+		if entry.StartedAt != nil {
+			return i, &entry
+		}
+	}
+
+	lastIndex := len(entries)-1
+	last := entries[lastIndex]
 
 	if last.StartedAt != nil {
-		return &last
+		return lastIndex, &last
 	}
 
-	return nil
+	return -1, nil
 }
 
 func writeToFile(filename string, entries []DateEntry) {
@@ -88,17 +98,17 @@ func startNewTimer() {
 		log.Fatal(err)
 	}
 
-	entry := getCurrentEntry(entries)
+	index, entry := getCurrentEntry(entries)
 	if entry == nil {
 		entries = append(entries, createEntry())
 		writeToFile(filename, entries)
 		return
 	}
 
-	stopCurrentEntry(entries, entry)
+	stopCurrentEntry(entries, index, entry)
 	entry.StartedAt = nil
 	entry.StoppedAt = nil
-	entries[len(entries)-1] = *entry
+	entries[index] = *entry
 	entries = append(entries, createEntry())
 	writeToFile(filename, entries)
 	fmt.Println("Created new entry and started timer")
@@ -116,39 +126,33 @@ func startTimer() {
 	}
 
 	timeNow := Now()
-	entry := getCurrentEntry(entries)
+	index, entry := getCurrentEntry(entries)
 
 	// No current entry found
 	if entry == nil {
 		newEntry := createEntry()
 		entries = append(entries, newEntry)
 		writeToFile(filename, entries)
-		fmt.Println("Timer started. Current time:", newEntry.Time)
+		fmt.Println("Start timer for a new day.")
 		return
 	}
 
-	// Current entry not stopped
-	if entry.StoppedAt == nil {
-		fmt.Println("Timer already started")
-		os.Exit(1)
-	}
-
+	// Start new timer if current is from yesterday
 	if timeNow.After(now.With(*entry.StartedAt).EndOfDay()) {
-		stopCurrentEntry(entries, entry)
+		stopCurrentEntry(entries, index, entry)
 		entry.StartedAt = nil
 		entry.StoppedAt = nil
-		entries[len(entries)-1] = *entry
+		entries[index] = *entry
 		newEntry := createEntry()
 		entries = append(entries, newEntry)
 		entry = &newEntry
-	} else {
-		entry.StoppedAt = nil
-		entry.StartedAt = &timeNow
-		entries[len(entries)-1] = *entry
+		writeToFile(filename, entries)
+		fmt.Println("Start timer for a new day.")
+		return
 	}
 
+	switchEntryPrompt(entries)
 	writeToFile(filename, entries)
-	fmt.Println("Timer started. Current time:", entry.Time)
 }
 
 func stopTimer() {
@@ -162,7 +166,7 @@ func stopTimer() {
 		log.Fatal(err)
 	}
 
-	entry := getCurrentEntry(entries)
+	index, entry := getCurrentEntry(entries)
 	if entry == nil {
 		log.Fatal("Timer not started")
 	}
@@ -172,15 +176,97 @@ func stopTimer() {
 		os.Exit(1)
 	}
 
-	stopCurrentEntry(entries, entry)
-	fmt.Println("Timer stopped. Current time:", entry.Time)
+	stopCurrentEntry(entries, index, entry)
+	fmt.Println("Timer stopped at:", entry.Time)
 
 	writeToFile(filename, entries)
 }
 
-func stopCurrentEntry(entries []DateEntry, current *DateEntry) {
+func stopCurrentEntry(entries []DateEntry, index int, current *DateEntry) {
 	timeNow := Now()
 	current.Time = getCurrentTime(*current)
 	current.StoppedAt = &timeNow
-	entries[len(entries)-1] = *current
+	entries[index] = *current
+}
+
+func switchEntryPrompt(entries []DateEntry) {
+	today := Now().Format("02.01.2006")
+	options := []string{}
+	tasks := []DateEntry{}
+
+	for _, entry := range entries {
+		if today != entry.Date {
+			continue
+		}
+
+		text := strings.ReplaceAll(entry.Description, "\n", "")
+		if entry.StartedAt != nil && entry.StoppedAt == nil {
+			text = text + " (started)"
+		} else if entry.StartedAt != nil {
+			text = text + " (stopped)"
+		}
+
+		options = append(options, text)
+		tasks = append(tasks, entry)
+	}
+
+	index := 0
+	prompt := &survey.Select{
+		Message: "Choose task:",
+		Help: "",
+		Options: options,
+	}
+
+	err := survey.AskOne(prompt, &index, survey.WithValidator(survey.Required))
+	if err != nil {
+		if err == terminal.InterruptErr {
+			fmt.Println("Switch aborted.")
+			return
+		}
+
+		log.Fatal(err)
+	}
+
+	timeNow := Now()
+	curIndex, cur := getCurrentEntry(entries)
+	selected := tasks[index]
+	selectedIndex := findEntryIndex(entries, selected)
+	if selectedIndex == -1 {
+		log.Fatal("Selected entry not found")
+	}
+
+	if cur != nil && *cur == selected {
+		if selected.StoppedAt != nil {
+			fmt.Println("Restart entry at:", selected.Time)
+			selected.StartedAt = &timeNow
+			selected.StoppedAt = nil
+			entries[curIndex] = selected
+		} else {
+			fmt.Println("Entry already started.")
+			return
+		}
+	} else {
+		if cur != nil {
+			cur.Time = getCurrentTime(*cur)
+			fmt.Println("Stopped entry at:", cur.Time)
+			cur.StoppedAt = nil
+			cur.StartedAt = nil
+			entries[curIndex] = *cur
+		}
+
+		fmt.Println("Start selected entry at:", selected.Time)
+		selected.StartedAt = &timeNow
+		selected.StoppedAt = nil
+		entries[selectedIndex] = selected
+	}
+}
+
+func findEntryIndex(entries []DateEntry, entry DateEntry) int {
+	for k, v := range entries {
+		if entry == v {
+			return k
+		}
+	}
+
+	return -1
 }
