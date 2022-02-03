@@ -38,7 +38,7 @@ func cmdTimerNew() *cli.Command {
 		Name:  "new",
 		Usage: "Create new date entry",
 		Action: func(c *cli.Context) error {
-			startNewTimer()
+			startNewTimer(c.Args().Get(0))
 			return nil
 		},
 	}
@@ -58,11 +58,7 @@ func getCurrentEntry(entries []DateEntry) (int, *DateEntry) {
 	lastIndex := len(entries)-1
 	last := entries[lastIndex]
 
-	if last.StartedAt != nil {
-		return lastIndex, &last
-	}
-
-	return -1, nil
+	return lastIndex, &last
 }
 
 func writeToFile(filename string, entries []DateEntry) {
@@ -87,7 +83,7 @@ func writeToFile(filename string, entries []DateEntry) {
 	}
 }
 
-func startNewTimer() {
+func startNewTimer(desc string) {
 	filename, err := findConfigFile()
 	if err != nil {
 		log.Fatal(err)
@@ -100,18 +96,28 @@ func startNewTimer() {
 
 	index, entry := getCurrentEntry(entries)
 	if entry == nil {
-		entries = append(entries, createEntry())
+		newEntry := createEntry()
+		if desc != "" {
+			newEntry.Description = desc
+		}
+		entries = append(entries, newEntry)
 		writeToFile(filename, entries)
+		fmt.Println("🏃 Start new timer:", newEntry.Description)
 		return
 	}
 
+	fmt.Println("💤 Timer stopped at:", entry.Time)
 	stopCurrentEntry(entries, index, entry)
 	entry.StartedAt = nil
 	entry.StoppedAt = nil
 	entries[index] = *entry
-	entries = append(entries, createEntry())
+	newEntry := createEntry()
+	if desc != "" {
+		newEntry.Description = desc
+	}
+	entries = append(entries, newEntry)
 	writeToFile(filename, entries)
-	fmt.Println("Created new entry and started timer")
+	fmt.Println("🏃 Start new timer:", newEntry.Description)
 }
 
 func startTimer() {
@@ -133,12 +139,12 @@ func startTimer() {
 		newEntry := createEntry()
 		entries = append(entries, newEntry)
 		writeToFile(filename, entries)
-		fmt.Println("Start timer for a new day.")
+		fmt.Println("🏃 Start timer for a new day.")
 		return
 	}
 
 	// Start new timer if current is from yesterday
-	if timeNow.After(now.With(*entry.StartedAt).EndOfDay()) {
+	if entry.StartedAt != nil && timeNow.After(now.With(*entry.StartedAt).EndOfDay()) {
 		stopCurrentEntry(entries, index, entry)
 		entry.StartedAt = nil
 		entry.StoppedAt = nil
@@ -147,7 +153,21 @@ func startTimer() {
 		entries = append(entries, newEntry)
 		entry = &newEntry
 		writeToFile(filename, entries)
-		fmt.Println("Start timer for a new day.")
+		fmt.Println("🏃 Start timer for a new day.")
+		return
+	}
+
+	if len(entries) == 1 {
+		if entry.StartedAt != nil && entry.StoppedAt == nil {
+			fmt.Println("Timer already started")
+			os.Exit(1)
+		}
+
+		entry.StoppedAt = nil
+		entry.StartedAt = &timeNow
+		entries[index] = *entry
+		writeToFile(filename, entries)
+		fmt.Println("🏃 Restart timer at:", entry.Time)
 		return
 	}
 
@@ -172,12 +192,12 @@ func stopTimer() {
 	}
 
 	if entry.StoppedAt != nil {
-		fmt.Println("Timer already stopped")
+		fmt.Println("Timer already stopped.")
 		os.Exit(1)
 	}
 
 	stopCurrentEntry(entries, index, entry)
-	fmt.Println("Timer stopped at:", entry.Time)
+	fmt.Println("💤 Timer stopped at:", entry.Time)
 
 	writeToFile(filename, entries)
 }
@@ -201,9 +221,9 @@ func switchEntryPrompt(entries []DateEntry) {
 
 		text := strings.ReplaceAll(entry.Description, "\n", "")
 		if entry.StartedAt != nil && entry.StoppedAt == nil {
-			text = text + " (started)"
+			text = text + " 🏃"
 		} else if entry.StartedAt != nil {
-			text = text + " (stopped)"
+			text = text + " 💤"
 		}
 
 		options = append(options, text)
@@ -221,7 +241,7 @@ func switchEntryPrompt(entries []DateEntry) {
 	if err != nil {
 		if err == terminal.InterruptErr {
 			fmt.Println("Switch aborted.")
-			return
+			os.Exit(1)
 		}
 
 		log.Fatal(err)
@@ -232,29 +252,30 @@ func switchEntryPrompt(entries []DateEntry) {
 	selected := tasks[index]
 	selectedIndex := findEntryIndex(entries, selected)
 	if selectedIndex == -1 {
-		log.Fatal("Selected entry not found")
+		fmt.Println("Selected entry not found.")
+		os.Exit(1)
 	}
 
-	if cur != nil && *cur == selected {
-		if selected.StoppedAt != nil {
-			fmt.Println("Restart entry at:", selected.Time)
+	if *cur == selected {
+		if selected.StoppedAt != nil || selected.StartedAt == nil {
+			fmt.Println("🏃 Restart entry at:", selected.Time)
 			selected.StartedAt = &timeNow
 			selected.StoppedAt = nil
 			entries[curIndex] = selected
 		} else {
 			fmt.Println("Entry already started.")
-			return
+			os.Exit(1)
 		}
 	} else {
 		if cur != nil {
 			cur.Time = getCurrentTime(*cur)
-			fmt.Println("Stopped entry at:", cur.Time)
+			fmt.Println("💤 Stopped entry at:", cur.Time)
 			cur.StoppedAt = nil
 			cur.StartedAt = nil
 			entries[curIndex] = *cur
 		}
 
-		fmt.Println("Start selected entry at:", selected.Time)
+		fmt.Println("🏃 Start selected entry at:", selected.Time)
 		selected.StartedAt = &timeNow
 		selected.StoppedAt = nil
 		entries[selectedIndex] = selected
