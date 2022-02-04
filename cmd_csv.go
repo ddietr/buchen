@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"log"
-	"strings"
 )
 
 func cmdCsv() *cli.Command {
