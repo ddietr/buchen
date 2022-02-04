@@ -152,3 +152,9 @@ func createEntry() DateEntry {
 		Description: "...",
 	}
 }
+
+func toInlineDescription(str string) string {
+	text := strings.Trim(str, "\n")
+	text = strings.ReplaceAll(text, "\n", ", ")
+	return text
+}

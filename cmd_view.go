@@ -47,9 +47,16 @@ func printTableView(sum bool) {
 	keys := []string{}
 
 	for i, entry := range entries {
+		entry.Description = toInlineDescription(entry.Description)
+
 		if !sum {
 			k := strconv.Itoa(i)
 			keys = append(keys, k)
+			if entry.StartedAt != nil && entry.StoppedAt == nil {
+				entry.Description = entry.Description + " 🏃"
+			} else if entry.StartedAt != nil {
+				entry.Description = entry.Description + " 💤"
+			}
 			data[k] = entry
 			continue
 		}
@@ -65,11 +72,15 @@ func printTableView(sum bool) {
 				log.Fatal(err)
 			}
 
-			f := a + b
-			s := strings.Replace(fmt.Sprintf("%.2f", f), ".", ",", 1)
+			existing.Time = strings.Replace(fmt.Sprintf("%.2f", a + b), ".", ",", 1)
+			if entry.StartedAt != nil && entry.StoppedAt == nil {
+				existing.Description += ", " + entry.Description + " 🏃"
+			} else if entry.StartedAt != nil {
+				existing.Description += ", " + entry.Description + " 💤"
+			} else {
+				existing.Description += ", " + entry.Description
+			}
 
-			existing.Time = s
-			existing.Description += ", " + entry.Description
 			matched, _ := regexp.MatchString(
 				"(?:^|[, ])" + existing.Project + "(,|$)",
 				entry.Project,

@@ -47,7 +47,7 @@ func printCsv(project string) {
 
 		fmt.Print(entry.Date)
 		fmt.Print(";")
-		fmt.Print(strings.Trim(strings.ReplaceAll(entry.Description, "\n", ", "), ", "))
+		fmt.Print(toInlineDescription(entry.Description))
 		fmt.Print(";")
 		fmt.Print(getCurrentTime(entry))
 		fmt.Println("")

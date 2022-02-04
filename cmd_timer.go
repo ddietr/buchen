@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"github.com/jinzhu/now"
 	"github.com/urfave/cli/v2"
 	"github.com/AlecAivazis/survey/v2"
@@ -219,7 +218,7 @@ func switchEntryPrompt(entries []DateEntry) {
 			continue
 		}
 
-		text := strings.ReplaceAll(entry.Description, "\n", "")
+		text := toInlineDescription(entry.Description)
 		if entry.StartedAt != nil && entry.StoppedAt == nil {
 			text = text + " 🏃"
 		} else if entry.StartedAt != nil {
