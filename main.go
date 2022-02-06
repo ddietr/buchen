@@ -71,23 +71,28 @@ func readConfig(filename string) ([]DateEntry, error) {
 }
 
 func findConfigFile() (string, error) {
+	filename := "buchen.yaml"
 	usr, err := user.Current()
 	if err != nil {
 		return "", err
 	}
 
-	filename := "buchen.yaml"
-	path := usr.HomeDir + "/" + filename
+	path := "./" + filename
 	_, err = os.Stat(path)
-
-	if err != nil {
-		return "", fmt.Errorf(
-			"Could not find configuration in %s. Run 'buchen init' to create the configuration",
-			path,
-		)
+	if err == nil {
+		return path, nil
 	}
 
-	return path, nil
+	path = usr.HomeDir + "/" + filename
+	_, err = os.Stat(path)
+	if err == nil {
+		return path, nil
+	}
+
+	return "", fmt.Errorf(
+		"Could not find configuration in %s. Run 'buchen init' to create the configuration",
+		path,
+	)
 }
 
 func serializeDateEntry(entry DateEntry) string {

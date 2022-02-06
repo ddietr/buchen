@@ -27,6 +27,7 @@ COMMANDS:
    stop     Stop the timer
    new      Create new date entry
    init     Init
+   csv      Print entries as csv
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
@@ -43,9 +44,31 @@ buchen init
 ## Start/Stop Timer
 
 ```shell
+# start new timer
 buchen start
+🏃 Start timer for a new day.
+
+# edit entry description to TICKET-1
+buchen e
+
 buchen stop
-Time: 0,12
+💤 Stopped "TICKET-1" at 0,12
+
+buchen start
+🏃 Restart "TICKET-1" at 0,12
+
+buchen new "TICKET-2"
+💤 Stopped "TICKET-1" at 0,23
+🏃 Start "TICKET-2"
+
+# switch to TICKET-1
+buchen start
+? Choose task:  [Use arrows to move, type to filter]
+> TICKET-1
+  TICKET-2 🏃
+# press enter
+💤 Stopped "TICKET-2" at 0,01
+🏃 Start "TICKET-1" at 0,02
 ```
 
 ## View
@@ -57,24 +80,11 @@ buchen view
 ```
 
 ```
-+--------+------+---------+----------------------------+
-|  DATE  | TIME | PROJECT |        DESCRIPTION         |
-+--------+------+---------+----------------------------+
-| 13 Oct | 8,77 | ...     | TICKET-387                 |
-|        |      |         |                            |
-| 14 Oct | 1,06 | ...     | ...                        |
-|        |      |         |                            |
-+--------+------+---------+----------------------------+
-```
-
-## Edit
-
-Edit date entries manually in your $EDITOR
-
-```shell
-buchen e
-# or
-buchen edit
++------------+------+---------+--------------------+
+|    DATE    | TIME | PROJECT |    DESCRIPTION     |
++------------+------+---------+--------------------+
+| 06.02.2022 | 0,35 | ...     | TICKET-1, TICKET-2 |
++------------+------+---------+--------------------+
 ```
 
 ## Export CSV

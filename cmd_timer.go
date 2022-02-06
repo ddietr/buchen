@@ -101,11 +101,11 @@ func startNewTimer(desc string) {
 		}
 		entries = append(entries, newEntry)
 		writeToFile(filename, entries)
-		fmt.Println("🏃 Start new timer:", newEntry.Description)
+		fmt.Printf("🏃 Start \"%s\"\n", toInlineDescription(newEntry.Description))
 		return
 	}
 
-	fmt.Println("💤 Timer stopped at:", entry.Time)
+	fmt.Printf("💤 Stopped \"%s\" at %s\n", toInlineDescription(entry.Description), entry.Time)
 	stopCurrentEntry(entries, index, entry)
 	entry.StartedAt = nil
 	entry.StoppedAt = nil
@@ -116,7 +116,7 @@ func startNewTimer(desc string) {
 	}
 	entries = append(entries, newEntry)
 	writeToFile(filename, entries)
-	fmt.Println("🏃 Start new timer:", newEntry.Description)
+	fmt.Printf("🏃 Start \"%s\"\n", toInlineDescription(newEntry.Description))
 }
 
 func startTimer() {
@@ -166,7 +166,7 @@ func startTimer() {
 		entry.StartedAt = &timeNow
 		entries[index] = *entry
 		writeToFile(filename, entries)
-		fmt.Println("🏃 Restart timer at:", entry.Time)
+		fmt.Printf("🏃 Restart \"%s\" at %s\n", toInlineDescription(entry.Description), entry.Time)
 		return
 	}
 
@@ -196,7 +196,7 @@ func stopTimer() {
 	}
 
 	stopCurrentEntry(entries, index, entry)
-	fmt.Println("💤 Timer stopped at:", entry.Time)
+	fmt.Printf("💤 Stopped \"%s\" at %s\n", toInlineDescription(entry.Description), entry.Time)
 
 	writeToFile(filename, entries)
 }
@@ -257,7 +257,7 @@ func switchEntryPrompt(entries []DateEntry) {
 
 	if *cur == selected {
 		if selected.StoppedAt != nil || selected.StartedAt == nil {
-			fmt.Println("🏃 Restart entry at:", selected.Time)
+			fmt.Printf("🏃 Restart \"%s\" at %s\n", toInlineDescription(selected.Description), selected.Time)
 			selected.StartedAt = &timeNow
 			selected.StoppedAt = nil
 			entries[curIndex] = selected
@@ -268,13 +268,13 @@ func switchEntryPrompt(entries []DateEntry) {
 	} else {
 		if cur != nil {
 			cur.Time = getCurrentTime(*cur)
-			fmt.Println("💤 Stopped entry at:", cur.Time)
+			fmt.Printf("💤 Stopped \"%s\" at %s\n", toInlineDescription(cur.Description), cur.Time)
 			cur.StoppedAt = nil
 			cur.StartedAt = nil
 			entries[curIndex] = *cur
 		}
 
-		fmt.Println("🏃 Start selected entry at:", selected.Time)
+		fmt.Printf("🏃 Start \"%s\" at %s\n", toInlineDescription(selected.Description), selected.Time)
 		selected.StartedAt = &timeNow
 		selected.StoppedAt = nil
 		entries[selectedIndex] = selected
