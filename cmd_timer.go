@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"github.com/jinzhu/now"
 	"github.com/urfave/cli/v2"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
@@ -131,6 +130,7 @@ func startTimer() {
 	}
 
 	timeNow := Now()
+	today := timeNow.Format("02.01.2006")
 	index, entry := getCurrentEntry(entries)
 
 	// No current entry found
@@ -143,14 +143,16 @@ func startTimer() {
 	}
 
 	// Start new timer if current is from yesterday
-	if entry.StartedAt != nil && timeNow.After(now.With(*entry.StartedAt).EndOfDay()) {
-		stopCurrentEntry(entries, index, entry)
-		entry.StartedAt = nil
-		entry.StoppedAt = nil
-		entries[index] = *entry
+	if today != entry.Date {
+		if entry.StartedAt != nil {
+			stopCurrentEntry(entries, index, entry)
+			entry.StartedAt = nil
+			entry.StoppedAt = nil
+			entries[index] = *entry
+		}
+
 		newEntry := createEntry()
 		entries = append(entries, newEntry)
-		entry = &newEntry
 		writeToFile(filename, entries)
 		fmt.Println("🏃 Start timer for a new day.")
 		return
@@ -200,6 +202,7 @@ func stopTimer() {
 
 	writeToFile(filename, entries)
 }
+
 
 func stopCurrentEntry(entries []DateEntry, index int, current *DateEntry) {
 	timeNow := Now()
