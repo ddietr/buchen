@@ -158,9 +158,14 @@ func startTimer() {
 		return
 	}
 
-	if len(entries) == 1 {
+	entriesTodayCount := 0
+	for _, e := range entries {
+		if today == e.Date { entriesTodayCount++ }
+	}
+
+	if entriesTodayCount == 1 {
 		if entry.StartedAt != nil && entry.StoppedAt == nil {
-			fmt.Println("Timer already started")
+			fmt.Println("Error: Timer already started")
 			os.Exit(1)
 		}
 
@@ -193,7 +198,7 @@ func stopTimer() {
 	}
 
 	if entry.StoppedAt != nil {
-		fmt.Println("Timer already stopped.")
+		fmt.Println("Error: Timer already stopped.")
 		os.Exit(1)
 	}
 
@@ -243,7 +248,7 @@ func switchEntryPrompt(entries []DateEntry) {
 	if err != nil {
 		if err == terminal.InterruptErr {
 			fmt.Println("Switch aborted.")
-			os.Exit(1)
+			os.Exit(0)
 		}
 
 		log.Fatal(err)
@@ -254,7 +259,7 @@ func switchEntryPrompt(entries []DateEntry) {
 	selected := tasks[index]
 	selectedIndex := findEntryIndex(entries, selected)
 	if selectedIndex == -1 {
-		fmt.Println("Selected entry not found.")
+		fmt.Println("Error: Selected entry not found.")
 		os.Exit(1)
 	}
 
@@ -265,7 +270,7 @@ func switchEntryPrompt(entries []DateEntry) {
 			selected.StoppedAt = nil
 			entries[curIndex] = selected
 		} else {
-			fmt.Println("Entry already started.")
+			fmt.Println("Error: Entry already started.")
 			os.Exit(1)
 		}
 	} else {
