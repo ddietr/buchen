@@ -39,6 +39,7 @@ func main() {
 			cmdTimerNew(),
 			cmdInit(),
 			cmdCsv(),
+			cmdAdd(),
 		},
 		Action: func(c *cli.Context) error {
 			printTableView(true)

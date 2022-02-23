@@ -28,6 +28,7 @@ COMMANDS:
    new      Create new date entry
    init     Init
    csv      Print entries as csv
+   add      Add description to current entry
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
@@ -50,6 +51,8 @@ buchen start
 
 # edit entry description to TICKET-1
 buchen e
+# or use add command
+buchen add TICKET-1
 
 buchen stop
 💤 Stopped "TICKET-1" at 0,12
