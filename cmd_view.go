@@ -5,10 +5,11 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli/v2"
 	"log"
+	"math"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
-	"regexp"
 )
 
 func cmdView() *cli.Command {
@@ -41,7 +42,7 @@ func printTableView(sum bool) {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	headers := []string{"Date", "Time", "Project", "Description"}
+	headers := []string{"Date", "Hours", "Time", "Project", "Description"}
 
 	var data = make(map[string]DateEntry)
 	keys := []string{}
@@ -72,11 +73,11 @@ func printTableView(sum bool) {
 				log.Fatal(err)
 			}
 
-			existing.Time = strings.Replace(fmt.Sprintf("%.2f", a + b), ".", ",", 1)
+			existing.Time = strings.Replace(fmt.Sprintf("%.2f", a+b), ".", ",", 1)
 			existing.Description += ", " + entry.Description
 
 			matched, _ := regexp.MatchString(
-				"(?:^|[, ])" + existing.Project + "(,|$)",
+				"(?:^|[, ])"+existing.Project+"(,|$)",
 				entry.Project,
 			)
 			if !matched {
@@ -93,10 +94,10 @@ func printTableView(sum bool) {
 
 	for _, k := range keys {
 		entry := data[k]
-		entry.Time = getCurrentTime(entry)
 		row := []string{
 			entry.Date,
-			entry.Time,
+			getCurrentTime(entry),
+			toTime(entry),
 			entry.Project,
 			entry.Description,
 		}
@@ -111,4 +112,11 @@ func printTableView(sum bool) {
 
 	table.SetHeader(headers)
 	table.Render()
+}
+
+func toTime(entry DateEntry) string {
+	f, _ := getCurrentTimeFloat64(entry)
+	floor := math.Floor(f)
+	time := (f-floor)/10*6 + floor
+	return strings.Replace(fmt.Sprintf("%.2f", time), ".", ":", 1)
 }

@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"github.com/urfave/cli/v2"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
+	"github.com/urfave/cli/v2"
+	"log"
+	"os"
 )
 
 func cmdTimerStart() *cli.Command {
@@ -53,7 +53,7 @@ func getCurrentEntry(entries []DateEntry) (int, *DateEntry) {
 		}
 	}
 
-	lastIndex := len(entries)-1
+	lastIndex := len(entries) - 1
 	last := entries[lastIndex]
 
 	return lastIndex, &last
@@ -160,7 +160,9 @@ func startTimer() {
 
 	entriesTodayCount := 0
 	for _, e := range entries {
-		if today == e.Date { entriesTodayCount++ }
+		if today == e.Date {
+			entriesTodayCount++
+		}
 	}
 
 	if entriesTodayCount == 1 {
@@ -208,7 +210,6 @@ func stopTimer() {
 	writeToFile(filename, entries)
 }
 
-
 func stopCurrentEntry(entries []DateEntry, index int, current *DateEntry) {
 	timeNow := Now()
 	current.Time = getCurrentTime(*current)
@@ -240,7 +241,7 @@ func switchEntryPrompt(entries []DateEntry) {
 	index := 0
 	prompt := &survey.Select{
 		Message: "Choose task:",
-		Help: "",
+		Help:    "",
 		Options: options,
 	}
 

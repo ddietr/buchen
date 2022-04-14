@@ -38,8 +38,8 @@ func printCsv(project string) {
 
 	fmt.Println("Datum;Beschreibung;Aufwand")
 	for _, entry := range entries {
-		if (project != "") {
-			if (entry.Project != project) {
+		if project != "" {
+			if entry.Project != project {
 				continue
 			}
 		}

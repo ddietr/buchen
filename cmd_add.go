@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"log"
-	"strings"
 	"bufio"
+	"fmt"
 	"github.com/urfave/cli/v2"
+	"log"
+	"os"
+	"strings"
 )
 
 func cmdAdd() *cli.Command {
 	return &cli.Command{
-		Name:    "add",
-		Usage:   "Add description to current entry",
+		Name:  "add",
+		Usage: "Add description to current entry",
 		Action: func(c *cli.Context) error {
 			if c.Args().Len() > 0 {
 				text := c.Args().Get(0)
