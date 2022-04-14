@@ -42,7 +42,7 @@ func printTableView(sum bool) {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	headers := []string{"Date", "Hours", "Time", "Project", "Description"}
+	headers := []string{"Date", "Hours", "Time", "From/To", "Project", "Description"}
 
 	var data = make(map[string]DateEntry)
 	keys := []string{}
@@ -97,7 +97,8 @@ func printTableView(sum bool) {
 		row := []string{
 			entry.Date,
 			getCurrentTime(entry),
-			toTime(entry),
+			toDuration(entry),
+			toFromTo(entry),
 			entry.Project,
 			entry.Description,
 		}
@@ -114,9 +115,31 @@ func printTableView(sum bool) {
 	table.Render()
 }
 
-func toTime(entry DateEntry) string {
+func toFromTo(entry DateEntry) string {
 	f, _ := getCurrentTimeFloat64(entry)
 	floor := math.Floor(f)
 	time := (f-floor)/10*6 + floor
-	return strings.Replace(fmt.Sprintf("%.2f", time), ".", ":", 1)
+
+	if f <= 6 {
+		return fmt.Sprintf("8:00-%s", formatTime(time+8))
+	}
+
+	breakT := 0.3
+	if f > 7.5 {
+		breakT = 1
+	}
+
+	to := formatTime(8 + time + breakT)
+	return fmt.Sprintf("8:00-%s 🍜%s", to, formatTime(breakT))
+}
+
+func toDuration(entry DateEntry) string {
+	f, _ := getCurrentTimeFloat64(entry)
+	floor := math.Floor(f)
+	time := (f-floor)/10*6 + floor
+	return formatTime(time)
+}
+
+func formatTime(f float64) string {
+	return strings.Replace(fmt.Sprintf("%.2f", f), ".", ":", 1)
 }
