@@ -117,27 +117,31 @@ func printTableView(sum bool) {
 
 func toFromTo(entry DateEntry) string {
 	f, _ := getCurrentTimeFloat64(entry)
-	floor := math.Floor(f)
-	time := (f-floor)/10*6 + floor
 
 	if f <= 6 {
-		return fmt.Sprintf("8:00-%s", formatTime(time+8))
+		return fmt.Sprintf("8:00-%s", formatTime(calcDuration(f+8)))
 	}
 
-	breakT := 0.3
+	breakT := 0.5
 	if f > 7.5 {
 		breakT = 1
 	}
 
-	to := formatTime(8 + time + breakT)
-	return fmt.Sprintf("8:00-%s 🍜%s", to, formatTime(breakT))
+	return fmt.Sprintf(
+		"8:00-%s 🍜%s",
+		formatTime(calcDuration(8+f+breakT)),
+		formatTime(calcDuration(breakT)),
+	)
+}
+
+func calcDuration(f float64) float64 {
+	floor := math.Floor(f)
+	return (f-floor)/10*6 + floor
 }
 
 func toDuration(entry DateEntry) string {
 	f, _ := getCurrentTimeFloat64(entry)
-	floor := math.Floor(f)
-	time := (f-floor)/10*6 + floor
-	return formatTime(time)
+	return formatTime(calcDuration(f))
 }
 
 func formatTime(f float64) string {
