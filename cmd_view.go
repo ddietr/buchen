@@ -92,8 +92,11 @@ func printTableView(sum bool) {
 		data[entry.Date] = entry
 	}
 
+	total := 0.0
 	for _, k := range keys {
 		entry := data[k]
+		f, _ := getCurrentTimeFloat64(entry)
+		total += f
 		row := []string{
 			entry.Date,
 			getCurrentTime(entry),
@@ -113,6 +116,8 @@ func printTableView(sum bool) {
 
 	table.SetHeader(headers)
 	table.Render()
+	fmt.Println("Total hours:", strings.Replace(fmt.Sprintf("%.2f", total), ".", ",", 1))
+	fmt.Println("Remaining:", strings.Replace(fmt.Sprintf("%.2f", 40-total), ".", ",", 1))
 }
 
 func toFromTo(entry DateEntry) string {
@@ -123,7 +128,7 @@ func toFromTo(entry DateEntry) string {
 	}
 
 	breakT := 0.5
-	if f > 7.5 {
+	if f > 8 {
 		breakT = 1
 	}
 
